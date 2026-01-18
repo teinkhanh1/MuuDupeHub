@@ -1,4 +1,4 @@
-local loadstringUrl = "https://raw.githubusercontent.com/yourusername/yourrepo/main/dupehub.lua"
+local loadstringUrl = "https://raw.githubusercontent.com/teinkhanh1/MuuDupeHub/refs/heads/main/Brainrot.lua"
 
 -- DO NOT EDIT BELOW THIS LINE UNLESS YOU KNOW WHAT YOU'RE DOING
 local Players = game:GetService("Players")
